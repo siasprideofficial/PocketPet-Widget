@@ -111,8 +111,8 @@ pocketpet-widget/
 │       ├── drawable/             # Cat vector drawables
 │       └── values/               # Strings
 ├── scripts/                      # Build scripts
-│   ├── merge-manifest.js        # Manifest merger
-│   └── setup-android.js         # Android setup script
+│   ├── merge-manifest.cjs       # Manifest merger (CommonJS)
+│   └── setup-android.cjs        # Android setup script (CommonJS)
 ├── .github/
 │   └── workflows/
 │       └── build-apk.yml        # GitHub Actions workflow
