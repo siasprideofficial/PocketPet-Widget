@@ -1,1 +1,5 @@
-
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_description">A cute animated pet widget for your home screen. Tap to interact!</string>
+    <string name="widget_name">PocketPet Widget</string>
+</resources>
