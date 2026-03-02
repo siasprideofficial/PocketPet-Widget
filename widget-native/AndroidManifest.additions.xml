@@ -1,1 +1,35 @@
+<!--
+    AndroidManifest.xml Additions for PocketPet Widget
+    
+    Add these entries inside the <application> tag of your AndroidManifest.xml
+    This is done automatically by scripts/merge-manifest.js
+-->
 
+<!-- PocketPet Widget Provider -->
+<receiver
+    android:name="com.pocketpet.widget.PocketPetWidgetProvider"
+    android:exported="true"
+    android:label="@string/widget_name">
+    <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+        <action android:name="com.pocketpet.widget.TAP" />
+        <action android:name="com.pocketpet.widget.UPDATE_MOOD" />
+    </intent-filter>
+    <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/widget_info" />
+</receiver>
+
+<!--
+    Also register the plugin in MainActivity.java:
+    
+    import com.pocketpet.widget.PocketPetWidgetPlugin;
+    
+    public class MainActivity extends BridgeActivity {
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            registerPlugin(PocketPetWidgetPlugin.class);
+            super.onCreate(savedInstanceState);
+        }
+    }
+-->
