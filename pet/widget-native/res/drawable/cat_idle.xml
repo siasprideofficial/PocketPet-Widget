@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 
+    Cat Idle State Vector Drawable
+    Orange tabby cat in relaxed idle pose
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="100dp"
+    android:height="100dp"
+    android:viewportWidth="200"
+    android:viewportHeight="200">
+    
+    <!-- Body -->
+    <path
+        android:pathData="M50,130 Q50,90 100,90 Q150,90 150,130 Q150,170 100,170 Q50,170 50,130 Z"
+        android:fillColor="#F59E0B"/>
+    
+    <!-- Head -->
+    <path
+        android:pathData="M60,80 A40,40 0 1,1 140,80 A40,40 0 1,1 60,80 Z"
+        android:fillColor="#F59E0B"/>
+    
+    <!-- Left Ear -->
+    <path
+        android:pathData="M65,55 L75,20 L90,50 Z"
+        android:fillColor="#F59E0B"/>
+    <path
+        android:pathData="M70,50 L78,28 L87,48 Z"
+        android:fillColor="#FFB6C1"/>
+    
+    <!-- Right Ear -->
+    <path
+        android:pathData="M135,55 L125,20 L110,50 Z"
+        android:fillColor="#F59E0B"/>
+    <path
+        android:pathData="M130,50 L122,28 L113,48 Z"
+        android:fillColor="#FFB6C1"/>
+    
+    <!-- Left Eye White -->
+    <path
+        android:pathData="M77,75 A8,10 0 1,1 93,75 A8,10 0 1,1 77,75 Z"
+        android:fillColor="#FFFFFF"/>
+    
+    <!-- Right Eye White -->
+    <path
+        android:pathData="M107,75 A8,10 0 1,1 123,75 A8,10 0 1,1 107,75 Z"
+        android:fillColor="#FFFFFF"/>
+    
+    <!-- Left Pupil -->
+    <path
+        android:pathData="M80,77 A5,5 0 1,1 90,77 A5,5 0 1,1 80,77 Z"
+        android:fillColor="#333333"/>
+    
+    <!-- Right Pupil -->
+    <path
+        android:pathData="M110,77 A5,5 0 1,1 120,77 A5,5 0 1,1 110,77 Z"
+        android:fillColor="#333333"/>
+    
+    <!-- Eye Highlights -->
+    <path
+        android:pathData="M81,74 A2,2 0 1,1 85,74 A2,2 0 1,1 81,74 Z"
+        android:fillColor="#FFFFFF"/>
+    <path
+        android:pathData="M111,74 A2,2 0 1,1 115,74 A2,2 0 1,1 111,74 Z"
+        android:fillColor="#FFFFFF"/>
+    
+    <!-- Nose -->
+    <path
+        android:pathData="M95,90 A5,4 0 1,1 105,90 A5,4 0 1,1 95,90 Z"
+        android:fillColor="#FFB6C1"/>
+    
+    <!-- Mouth -->
+    <path
+        android:pathData="M95,95 Q100,100 105,95"
+        android:strokeColor="#333333"
+        android:strokeWidth="2"
+        android:fillColor="#00000000"/>
+    
+    <!-- Tail -->
+    <path
+        android:pathData="M150,130 Q180,100 160,80"
+        android:strokeColor="#F59E0B"
+        android:strokeWidth="12"
+        android:strokeLineCap="round"
+        android:fillColor="#00000000"/>
+    
+    <!-- Paws -->
+    <path
+        android:pathData="M55,165 A15,8 0 1,1 85,165 A15,8 0 1,1 55,165 Z"
+        android:fillColor="#F59E0B"/>
+    <path
+        android:pathData="M115,165 A15,8 0 1,1 145,165 A15,8 0 1,1 115,165 Z"
+        android:fillColor="#F59E0B"/>
+    
+</vector>
