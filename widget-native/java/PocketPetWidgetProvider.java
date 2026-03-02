@@ -11,6 +11,9 @@ import android.os.Handler;
 import android.os.Looper;
 import android.widget.RemoteViews;
 
+// R import - will be updated by merge script if package name differs
+import com.pocketpet.widget.R;
+
 import java.util.Calendar;
 import java.util.Random;
 
