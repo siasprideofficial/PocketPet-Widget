@@ -1,1 +1,125 @@
+# GitHub Actions Workflow for Building PocketPet Widget APK
+# This workflow automatically builds an Android APK when code is pushed
 
+name: Build Android APK
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:  # Allows manual trigger
+
+jobs:
+  build:
+    name: Build APK
+    runs-on: ubuntu-latest
+    
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Step 2: Set up Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      # Step 3: Install Node.js dependencies
+      - name: Install dependencies
+        run: npm ci
+
+      # Step 4: Build the Vite project
+      - name: Build web app
+        run: npm run build
+
+      # Step 5: Install Capacitor CLI globally
+      - name: Install Capacitor CLI
+        run: npm install -g @capacitor/cli
+
+      # Step 6: Add Android platform if not exists
+      - name: Add Android platform
+        run: |
+          if [ ! -d "android" ]; then
+            npx cap add android
+          fi
+
+      # Step 7: Sync Capacitor
+      - name: Sync Capacitor
+        run: npx cap sync android
+
+      # Step 8: Copy native widget files
+      - name: Copy widget native files
+        run: |
+          # Copy widget provider
+          mkdir -p android/app/src/main/java/com/pocketpet/widget
+          cp -r widget-native/java/* android/app/src/main/java/com/pocketpet/widget/
+          
+          # Copy widget layouts
+          mkdir -p android/app/src/main/res/layout
+          cp widget-native/res/layout/* android/app/src/main/res/layout/
+          
+          # Copy widget info
+          mkdir -p android/app/src/main/res/xml
+          cp widget-native/res/xml/* android/app/src/main/res/xml/
+          
+          # Copy drawable resources
+          mkdir -p android/app/src/main/res/drawable
+          cp widget-native/res/drawable/* android/app/src/main/res/drawable/
+          
+          # DO NOT copy strings.xml separately - merge script handles it
+          # This prevents duplicate resource errors
+          
+          # Merge AndroidManifest and strings (using .cjs for CommonJS compatibility)
+          node scripts/merge-manifest.cjs
+
+      # Step 9: Set up JDK
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      # Step 10: Grant execute permission for gradlew
+      - name: Grant execute permission for gradlew
+        run: chmod +x android/gradlew
+
+      # Step 11: Build Debug APK
+      - name: Build Debug APK
+        working-directory: android
+        run: ./gradlew assembleDebug
+
+      # Step 12: Build Release APK (unsigned)
+      - name: Build Release APK
+        working-directory: android
+        run: ./gradlew assembleRelease
+
+      # Step 13: Upload Debug APK
+      - name: Upload Debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: pocketpet-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 30
+
+      # Step 14: Upload Release APK
+      - name: Upload Release APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: pocketpet-release-apk
+          path: android/app/build/outputs/apk/release/app-release-unsigned.apk
+          retention-days: 30
+
+      # Step 15: Create Release (on tag push)
+      - name: Create Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            android/app/build/outputs/apk/debug/app-debug.apk
+            android/app/build/outputs/apk/release/app-release-unsigned.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
