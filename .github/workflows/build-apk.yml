@@ -53,7 +53,16 @@ jobs:
       # Step 8: Copy native widget files
       - name: Copy widget native files
         run: |
-          # Copy widget provider
+          # Clean up any existing widget files first to prevent duplicates
+          rm -rf android/app/src/main/java/com/pocketpet/widget
+          rm -f android/app/src/main/res/layout/widget_layout.xml
+          rm -f android/app/src/main/res/layout/widget_loading.xml
+          rm -f android/app/src/main/res/xml/widget_info.xml
+          rm -f android/app/src/main/res/drawable/cat_*.xml
+          rm -f android/app/src/main/res/drawable/widget_*.xml
+          rm -f android/app/src/main/res/values/widget_strings.xml
+          
+          # Copy widget provider Java files
           mkdir -p android/app/src/main/java/com/pocketpet/widget
           cp -r widget-native/java/* android/app/src/main/java/com/pocketpet/widget/
           
@@ -68,9 +77,6 @@ jobs:
           # Copy drawable resources
           mkdir -p android/app/src/main/res/drawable
           cp widget-native/res/drawable/* android/app/src/main/res/drawable/
-          
-          # DO NOT copy strings.xml separately - merge script handles it
-          # This prevents duplicate resource errors
           
           # Merge AndroidManifest and strings (using .cjs for CommonJS compatibility)
           node scripts/merge-manifest.cjs
