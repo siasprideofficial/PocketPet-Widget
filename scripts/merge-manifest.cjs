@@ -135,27 +135,19 @@ function mergeStrings() {
     console.log('✅ Widget strings added to strings.xml');
 }
 
-function getAppPackageName() {
-    // Read the manifest to get the actual package name
-    if (!fs.existsSync(MANIFEST_PATH)) {
-        return 'com.pocketpet.app';
-    }
-    
-    const manifest = fs.readFileSync(MANIFEST_PATH, 'utf8');
-    const match = manifest.match(/package="([^"]+)"/);
-    return match ? match[1] : 'com.pocketpet.app';
-}
-
 function fixJavaImports() {
-    console.log('🔧 Fixing R class imports in Java files...');
+    console.log('🔧 Adding R class imports to Java files...');
     
     if (!fs.existsSync(WIDGET_JAVA_PATH)) {
         console.log('⚠️ Widget Java path not found, skipping import fix');
         return;
     }
     
-    const packageName = getAppPackageName();
-    console.log(`📦 App package name: ${packageName}`);
+    // The R class package MUST match the applicationId in capacitor.config.ts
+    // which is 'com.pocketpet.widget' - NOT from the manifest package attribute
+    const APP_ID = 'com.pocketpet.widget';
+    const correctImport = `import ${APP_ID}.R;`;
+    console.log(`📦 Using App ID for R class: ${APP_ID}`);
     
     const javaFiles = fs.readdirSync(WIDGET_JAVA_PATH).filter(f => f.endsWith('.java'));
     
@@ -164,33 +156,37 @@ function fixJavaImports() {
         let content = fs.readFileSync(filePath, 'utf8');
         let modified = false;
         
-        // Replace any R import with actual package R import
-        const rImportPatterns = [
-            /import com\.pocketpet\.app\.R;/g,
-            /import com\.pocketpet\.widget\.R;/g,
-        ];
-        
-        const newImport = `import ${packageName}.R;`;
-        
-        for (const pattern of rImportPatterns) {
-            if (pattern.test(content)) {
-                content = content.replace(pattern, newImport);
+        // First, remove any existing R imports to avoid duplicates
+        const existingRImport = content.match(/import com\.[a-zA-Z0-9_.]+\.R;\n?/g);
+        if (existingRImport) {
+            for (const imp of existingRImport) {
+                content = content.replace(imp, '');
                 modified = true;
             }
         }
         
-        // Also check if R is used but not imported
-        if (!content.includes(`import ${packageName}.R;`) && content.includes('R.layout') || content.includes('R.drawable')) {
-            const packageLine = content.match(/package [^;]+;/);
-            if (packageLine && !content.includes('import') ) {
-                content = content.replace(packageLine[0], `${packageLine[0]}\n\n${newImport}`);
+        // Now add the correct R import after the last android import
+        // Find the last android.* import line
+        const importLines = content.match(/import android\.[^;]+;/g);
+        if (importLines && importLines.length > 0) {
+            const lastAndroidImport = importLines[importLines.length - 1];
+            content = content.replace(
+                lastAndroidImport,
+                `${lastAndroidImport}\n\n${correctImport}`
+            );
+            modified = true;
+        } else {
+            // Fallback: add after package declaration
+            const packageMatch = content.match(/package [^;]+;/);
+            if (packageMatch) {
+                content = content.replace(packageMatch[0], `${packageMatch[0]}\n\n${correctImport}`);
                 modified = true;
             }
         }
         
         if (modified) {
             fs.writeFileSync(filePath, content, 'utf8');
-            console.log(`✅ Fixed R import in ${file}`);
+            console.log(`✅ Added R import to ${file}`);
         }
     }
 }
