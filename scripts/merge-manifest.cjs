@@ -14,6 +14,7 @@ const ANDROID_MAIN_PATH = path.join(__dirname, '../android/app/src/main');
 const MANIFEST_PATH = path.join(ANDROID_MAIN_PATH, 'AndroidManifest.xml');
 const STRINGS_PATH = path.join(ANDROID_MAIN_PATH, 'res/values/strings.xml');
 const WIDGET_STRINGS_PATH = path.join(ANDROID_MAIN_PATH, 'res/values/widget_strings.xml');
+const WIDGET_JAVA_PATH = path.join(ANDROID_MAIN_PATH, 'java/com/pocketpet/widget');
 
 const WIDGET_MANIFEST_SNIPPET = `
         <!-- PocketPet Widget Provider -->
@@ -134,6 +135,66 @@ function mergeStrings() {
     console.log('✅ Widget strings added to strings.xml');
 }
 
+function getAppPackageName() {
+    // Read the manifest to get the actual package name
+    if (!fs.existsSync(MANIFEST_PATH)) {
+        return 'com.pocketpet.app';
+    }
+    
+    const manifest = fs.readFileSync(MANIFEST_PATH, 'utf8');
+    const match = manifest.match(/package="([^"]+)"/);
+    return match ? match[1] : 'com.pocketpet.app';
+}
+
+function fixJavaImports() {
+    console.log('🔧 Fixing R class imports in Java files...');
+    
+    if (!fs.existsSync(WIDGET_JAVA_PATH)) {
+        console.log('⚠️ Widget Java path not found, skipping import fix');
+        return;
+    }
+    
+    const packageName = getAppPackageName();
+    console.log(`📦 App package name: ${packageName}`);
+    
+    const javaFiles = fs.readdirSync(WIDGET_JAVA_PATH).filter(f => f.endsWith('.java'));
+    
+    for (const file of javaFiles) {
+        const filePath = path.join(WIDGET_JAVA_PATH, file);
+        let content = fs.readFileSync(filePath, 'utf8');
+        let modified = false;
+        
+        // Replace any R import with actual package R import
+        const rImportPatterns = [
+            /import com\.pocketpet\.app\.R;/g,
+            /import com\.pocketpet\.widget\.R;/g,
+        ];
+        
+        const newImport = `import ${packageName}.R;`;
+        
+        for (const pattern of rImportPatterns) {
+            if (pattern.test(content)) {
+                content = content.replace(pattern, newImport);
+                modified = true;
+            }
+        }
+        
+        // Also check if R is used but not imported
+        if (!content.includes(`import ${packageName}.R;`) && content.includes('R.layout') || content.includes('R.drawable')) {
+            const packageLine = content.match(/package [^;]+;/);
+            if (packageLine && !content.includes('import') ) {
+                content = content.replace(packageLine[0], `${packageLine[0]}\n\n${newImport}`);
+                modified = true;
+            }
+        }
+        
+        if (modified) {
+            fs.writeFileSync(filePath, content, 'utf8');
+            console.log(`✅ Fixed R import in ${file}`);
+        }
+    }
+}
+
 // Run the merges
 try {
     // First, clean up any duplicate files from previous runs
@@ -141,6 +202,7 @@ try {
     
     mergeManifest();
     mergeStrings();
+    fixJavaImports();
     console.log('🎉 Manifest merge complete!');
 } catch (error) {
     console.error('❌ Error during merge:', error.message);
